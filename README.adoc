@@ -1,0 +1,56 @@
+= portgen_java
+
+A simple Java program to generate an OpenBSD port to build packages from a Java
+program that has a pom file but doesn't offer precompiled packages or for which
+those are not trusted by the porter.
+
+This needs to be packaged as a port in its own right; it cannot go into base
+because it depends on a Java port being installed.
+
+== Usage
+
+	portgen_java source-dir
+
+The given `source-dir` must be a project that has a pom file, and in general should have an
+`assembly:single` task to build a finished jar.
+
+== What it does
+
+Checks for, and reads, the pom file in the target directory. Extracts the name and version.
+
+Runs maven with some options to make it download all the dependencies into a new temporary dir.
+Gets the list of required files from the temporary dir.
+
+Plugs the name and version into a minimal `Makefile`, along with the list of deps as `DISTFILES1`,
+and saves the Makefile under `/usr/ports/myports/java/NAME`, where `NAME` is
+the name element at the top of the `pom` file.
+
+== What it does not do
+
+Due to the huge variability of Java programs,
+the `Makefile` will need considerable editing.
+
+This program doesn't yet generate (but these are trivial):
+
+* for programs, a run script in /usr/local/bin and a desktop file for GUI start;
+* for services, an `/etc/rc.d` file.
+
+== Future Work
+
+=== Work around bugs in Maven itself
+
+The familiar `mvn` command is just a skeleton. Running it on an utterly trivial
+demo project downloads about 80MB of "standard" dependencies plus any that are needed by the app.
+
+Maven further does not distinguish between a user and system "local" directories,
+so there's no way to just package these standard deps and have Maven find them. However,
+if there were a separate port/package of these deps, a future version of this program 
+could just cp -r that into the temp folder.
+
+=== Base Portgen is written in Perl
+
+Perl can call Java, using `Inline::Java` - if we had that in base, this could be
+called directly from the existing portgen.
+
+Alternately, if somebody wants to manually (not using any AI) wants to translate this into Perl,
+it could be added as a module into the standard perl-based `portgen` in base.

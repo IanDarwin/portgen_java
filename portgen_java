@@ -1,0 +1,192 @@
+#!/usr/local/jdk-25/bin/java --source 25
+
+// Proof-of-concept for fetching all deps in advance,
+// as needed by OpenBSD ports builders.
+
+import java.io.*;
+import java.util.*;
+import java.nio.file.*;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+final static String MAKEFILE_TEMPLATE = """
+# Makefile for ${name} - originally made by portgen_java
+# You'll need to do a lot of editing before committing this!
+DISTNAME=	${name}-${version}
+PKGNAME=	${name}
+PKG_ARCH=	*
+CATEGORIES= java devel
+MASTER_SITES= https://repo1.maven.org/maven2/
+FETCH= ${WRKDIR}/${DISTNAME}.jar
+EXTRACT_SUFX=	.jar
+
+MODULES=		java
+MODJAVA_VER=		25+
+
+EXTRA_DISTFILES	= \\
+${distfiles_list}
+
+RUN_DEPENDS+=		devel/desktop-file-utils \\
+			java/javaPathHelper
+			# java/standardMavenFiles
+
+NO_BUILD=		Yes
+NO_TEST=		Yes
+
+do_build:
+	cd ${WRKDIR}
+	mvn compile test package assembly:single
+
+do_install:
+	@echo Figure out where to install the JAR file, and do so here.
+	@echo Consider a startup file in /usr/local/bin or /etc/rc.d as appropriate.
+	@exit 1
+
+.include <bsd.port.mk>
+""";
+final static String USER_HOME = System.getProperty("user.home");
+static Path USER_REPO_PATH;
+final static String SETTINGS_TEMPLATE = USER_HOME + "/git/portgen_java/settings.template";
+final static String SETTINGS_FILE = USER_HOME + "/git/portgen_java/settings.xml";
+final static String MYSTUFF = "/usr/ports/mystuff/java/";
+static boolean debug = true;
+
+void main(String[] args) throws Exception {
+
+	boolean force = false;
+	String targetDir = "/";
+
+	switch (args.length) {
+		case 0:
+			usage();
+			break;
+		case 1:
+			targetDir = args[0];
+			break;
+		case 2:
+			force = true;
+			targetDir = args[1];
+			break;
+		default:
+			usage();
+			break;
+	}
+
+	var pom = Path.of(targetDir + "/pom.xml");
+	if (!Files.isReadable(pom)) {
+		System.err.println("Cannot locate " + pom + ". Run in Java source directory.");
+	}
+
+	Document doc = readDoc(pom);
+	var project = doc.getDocumentElement();
+	var name = project.getElementsByTagName("artifactId").item(0).getTextContent();
+	var version = project.getElementsByTagName("version").item(0).getTextContent();
+
+	if (version.contains("SNAPSHOT")) {
+		System.out.println("Warning: Snapshot version in pom file");
+	}
+	System.out.printf("Artifact Name %s, Version %s\n", name, version);
+
+	Path mystuffdir = Path.of(MYSTUFF + name + "/");
+	if (Files.isDirectory(mystuffdir)) {
+		if (force) {
+			nukeDir(mystuffdir);
+		} else {
+			System.out.println("Error: output directory exists: " + mystuffdir);
+			System.exit(1);
+		}
+	}
+
+	USER_REPO_PATH = Files.createTempDirectory("portgenjava");
+	if (debug) {
+		System.out.println("User Repository is " + USER_REPO_PATH);
+	}
+	String settingsTemplate = Files.readString(Path.of(SETTINGS_TEMPLATE));
+	settingsTemplate = settingsTemplate.replace("${user-repo}", USER_REPO_PATH.toString());
+	Files.writeString(Path.of(SETTINGS_FILE), settingsTemplate);
+
+	String[] newArgsArray = {"mvn", "-s", SETTINGS_FILE, "dependency:go-offline"};
+	List<String> newArgs = Arrays.asList(newArgsArray);
+	if (debug) {
+		System.out.println("Dir:  " + targetDir);
+		System.out.println("Args: " + newArgs);
+	}
+	ProcessBuilder builder = new ProcessBuilder(newArgs);
+	final Process maven = builder.directory(new File(targetDir)).start();
+	// Now copy its stdout to ours
+	if (debug) {
+		BufferedReader is = maven.inputReader();
+		String line;
+		while ((line = is.readLine()) != null) {
+			System.out.println(line);
+		}
+	}
+	System.err.println("Waiting for the end (of the maven)");			 
+	int ret = maven.waitFor();
+	if (ret != 0) {
+		System.out.printf("Error: Maven get-geps failed, code %d\n", ret);
+		System.exit(1);
+	}
+
+	// Put generated files in $mystuff/java/name
+	Files.createDirectories(mystuffdir);
+
+	// Create list of files.
+	StringBuffer flist = new StringBuffer();
+	Files.walk(USER_REPO_PATH)
+		.filter(s -> s.toString().endsWith(".jar") | s.toString().endsWith(".pom") | s.toString().endsWith(".sha1"))
+		.forEach(p->flist.append(p).append(" \\\n"));
+
+	// Create Makefile
+	String makefile = MAKEFILE_TEMPLATE
+		.replace("${name}", name)
+		.replace("${version}", version)
+		.replace("${distfiles_list}", flist.toString().replaceAll(USER_REPO_PATH.toString(), ""));
+	Files.writeString(Path.of(mystuffdir + "/Makefile"), makefile);
+
+	System.out.println("Makefile generated in " + mystuffdir + ", check it out!");
+
+	// Clean up the user repo now that we have the PLIST info.
+	nukeDir(USER_REPO_PATH);
+}
+
+// print usage and exit
+void usage() {
+	System.err.println("Usage: portgen_java source_directory");
+	System.exit(1);
+}
+
+/** Read the XML document */
+Document readDoc(Path path) throws Exception {
+	DocumentBuilderFactory fact = DocumentBuilderFactory.newInstance();
+	fact.setIgnoringComments(false);
+	DocumentBuilder parser = fact.newDocumentBuilder();
+	Document doc = parser.parse(Files.newInputStream(path));
+	return doc;
+}
+
+/** Remove entire directory tree (stolen from FileVisitor javadoc) */
+void nukeDir(Path p) throws IOException {
+	Files.walkFileTree(p, new SimpleFileVisitor<Path>() {
+         @Override
+         public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+             Files.delete(file);
+             return FileVisitResult.CONTINUE;
+         }
+         @Override
+         public FileVisitResult postVisitDirectory(Path dir, IOException e) throws IOException {
+             if (e == null) {
+                 Files.delete(dir);
+                 return FileVisitResult.CONTINUE;
+             } else {
+                 // directory iteration failed
+                 throw e;
+             }
+         }
+     });
+}
