@@ -52,8 +52,8 @@ do_install:
 """;
 final static String USER_HOME = System.getProperty("user.home");
 static Path USER_REPO_PATH;
-final static String SETTINGS_TEMPLATE = USER_HOME + "/git/portgen_java/settings.template";
-final static String SETTINGS_FILE = USER_HOME + "/git/portgen_java/settings.xml";
+final static String SETTINGS_TEMPLATE = USER_HOME + "/portgen_java/settings.template";
+final static String SETTINGS_FILE = USER_HOME + "/portgen_java/settings.xml";
 final static String MYSTUFF = "/usr/ports/mystuff/java/";
 static boolean debug = true;
 static boolean verbose = false;	// XXX Add in argv handling.
