@@ -30,7 +30,7 @@ the name element at the top of the `pom` file.
 == What it does not do
 
 Due to the huge variability of Java programs,
-the `Makefile` will need considerable editing.
+the generated `Makefile` will need considerable editing.
 
 This program doesn't yet generate (but these are trivial):
 
