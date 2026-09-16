@@ -1,0 +1,6 @@
+#!/bin/sh
+
+set -x
+
+cd ..
+tar czvf /tmp/portgen_java.tgz portgen-java/{README.adoc,*java,*template,mkdist}
