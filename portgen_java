@@ -142,7 +142,7 @@ void main(String[] args) throws Exception {
 	Files.createDirectories(mystuffdir);
 
 	// Create list of files.
-	StringBuffer flist = new StringBuffer();
+	StringBuilder flist = new StringBuilder();
 	Files.walk(USER_REPO_PATH)
 		.filter(s -> s.toString().endsWith(".jar") | s.toString().endsWith(".pom") | s.toString().endsWith(".sha1"))
 		.forEach(p->flist.append(p).append(" \\\n"));
