@@ -9,10 +9,12 @@ because it depends on a Java port being installed.
 
 == Usage
 
-	portgen_java source-dir
+	portgen_java [-f] source-dir
 
 The given `source-dir` must be a project that has a pom file, and in general should have an
 `assembly:single` task to build a finished jar.
+
+The `-f` option tell it to remove a previously-generated existing `mystuff/java/NAME` directory.
 
 == What it does
 
@@ -22,7 +24,7 @@ Runs maven with some options to make it download all the dependencies into a new
 Gets the list of required files from the temporary dir.
 
 Plugs the name and version into a minimal `Makefile`, along with the list of deps as `DISTFILES1`,
-and saves the Makefile under `/usr/ports/myports/java/NAME`, where `NAME` is
+and saves the Makefile under `/usr/ports/mystuff/java/NAME/Makefile`, where `NAME` is
 the name element at the top of the `pom` file.
 
 == What it does not do

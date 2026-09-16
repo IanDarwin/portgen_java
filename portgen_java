@@ -149,7 +149,7 @@ void main(String[] args) throws Exception {
 		.replace("${distfiles_list}", flist.toString().replaceAll(USER_REPO_PATH.toString(), ""));
 	Files.writeString(Path.of(mystuffdir + "/Makefile"), makefile);
 
-	System.out.println("Makefile generated in " + mystuffdir + ", check it out!");
+	System.out.println("Makefile generated in " + mystuffdir + "/Makefile - check it out!");
 
 	// Clean up the user repo now that we have the PLIST info.
 	nukeDir(USER_REPO_PATH);
