@@ -1,0 +1,22 @@
+<!--
+ *** NOT USED AT PRESENT - part of an experiment on the
+ *** "Don't download the internet every time" problem.
+ -->
+<settings xmlns="http://maven.apache.org/SETTINGS/1.2.0">
+	<profiles>
+		<profile>
+		<id>portgen_java_main</id>
+			  <activation>
+				<activeByDefault>true</activeByDefault>
+				</activation>
+				<repositories>
+				<repository>
+				  <id>StdStuff</id>
+				  <name>StdStuff</name>
+				  <url>http://localhost:8000</url>
+				  <layout>default</layout>
+				</repository>
+			  </repositories>
+		</profile>
+	</profiles>
+</settings>
