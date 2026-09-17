@@ -109,6 +109,8 @@ void main(String[] args) throws Exception {
 		}
 	}
 
+	// Generate local 'settings.xml' for Maven, using the generated tmp repo
+	// We have to create the temporary local repo first so we can insert into this file.
 	USER_REPO_PATH = Files.createTempDirectory("portgenjava");
 	if (debug) {
 		System.out.println("User Repository is " + USER_REPO_PATH);
@@ -117,6 +119,9 @@ void main(String[] args) throws Exception {
 	settingsTemplate = settingsTemplate.replace("${user-repo}", USER_REPO_PATH.toString());
 	Files.writeString(Path.of(SETTINGS_FILE), settingsTemplate);
 
+	// XXX Copy the system jars here, adding them to a Set<String>
+
+	// Now run Maven to just get the app-specific dependencies
 	String[] newArgsArray = {"mvn", "-s", SETTINGS_FILE, "dependency:go-offline"};
 	List<String> newArgs = Arrays.asList(newArgsArray);
 	if (debug) {
@@ -143,20 +148,19 @@ void main(String[] args) throws Exception {
 		System.exit(1);
 	}
 
-	// Put generated files in $mystuff/java/name
-	Files.createDirectories(mystuffdir);
-
-	// Create list of files.
+	// Create list of files that were downloaded.
 	StringBuilder flist = new StringBuilder();
 	Files.walk(USER_REPO_PATH)
 		.filter(s -> s.toString().endsWith(".jar") | s.toString().endsWith(".pom") | s.toString().endsWith(".sha1"))
 		.forEach(p->flist.append(p).append(" \\\n"));
 
-	// Create Makefile
+	// Create generated Makefile in $mystuff/java/name
+	Files.createDirectories(mystuffdir);
 	String makefile = MAKEFILE_TEMPLATE
 		.replace("${name}", name)
 		.replace("${version}", version)
-		.replace("${distfiles_list}", flist.toString().replaceAll(USER_REPO_PATH.toString(), ""));
+		// Write filenames, excluding directory location and left-over leading "/"
+		.replace("${distfiles_list}", flist.toString().replaceAll(USER_REPO_PATH.toString().substring(1), ""));
 	Files.writeString(Path.of(mystuffdir + "/Makefile"), makefile);
 
 	System.out.println("Makefile generated in " + mystuffdir + "/Makefile - check it out!");
