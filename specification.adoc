@@ -1,0 +1,63 @@
+= portgen_java
+
+A Java program to build an OpenBSD port to build a Java application.
+Similar to what portgen does for Perl5, GO and Ruby.
+
+The input is a pom.xml file in the source directory of a Java application;
+the directory is passed as the filename argument to this program.
+
+The output is an OpenBSD ports Makefile, saved in /usr/ports/mystuff/java/NAME.
+The Makefile is generated from an internal string template.
+
+The program is free of external Jar file dependencies, and can be run
+as a script on Java 21+ using a shebang line, which is included.
+
+== Operation
+
+The program starts by reading a Maven pom.xml file, which is assumed to be in the source directory of a
+Java application project. It extracts the project name and version number, to use in the generated Makefile.
+
+The program creates a temporary directory, and puts its full path into the `localRepository` element in a
+very minimal `settings.xml`. 
+
+The first main step is running the Maven binary `mvn` in the target directory,
+passing the generated `settings.xml` with the `-s` argument to Maven,
+and the `dependency:go-offline` parameter, which forces Maven to download all its dependencies.
+The downloading information is suppressed unless the verbose option is provided (see Invocation below).
+
+The program then obtains a list of downloaded files, by walking the temporary repository directory.
+Filenames that end with .jar, .pom or .sha1 are added to a StringBuilder, for use in generating the Makefile.
+
+The second main step is combining all this information into the Makefile, which is a template
+form with placeholders like "${name}", "${version}, and "${distfiles_list}".
+The generated Makefile is saved into the newly-created /usr/ports/mystuff/java/NAME.
+
+Finally, by default, the temporary local repo is deleted.
+
+Progress messages are printed after most steps.
+
+== Directories
+
+To clarify, there are three directories involved:
+
+* the source directory with the pom file and the java source code (passed in as an argument).
+* the temporary local repository into which files are downloaded.
+* the generated port: /usr/ports/mystuff/java/NAME.
+
+== Invocation
+
+The program is invoked with the name of the directory containing the pom file.
+The following optional arguments (which do not combine in the usual Unix-y way)
+may precede the directory name:
+
+* -d - debugging output
+* -f - force removal of the generated port directory before starting
+* -k - keep the temporary local repostiroy (it is by default deleted at the end)
+* -v - verbose - information less detailed than the debugging output.
+
+== Unresolved Issue
+
+Each invocation starts by downloading about 80MB of "standard" Jar files that are needed by Maven.
+These could be stored in a dirctory in /usr/local, copied into the local repository before
+Maven is run, and excluded from the list in the Makefile. But this adds a level of complexity due to
+the fact that Maven has problems with multiple repository locations. This is an ongoing investigation.
