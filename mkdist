@@ -2,5 +2,8 @@
 
 set -x
 
+GIT_VER=$(gitver)
+
 cd ..
-tar czvf /tmp/portgen_java-$(gitver).tgz portgen_java/{README.adoc,mkdist,portgen_java,settings-global.xml,settings.template,specification.adoc}
+
+tar czvf /tmp/portgen_java-${GIT_VER}.tgz portgen_java/{README.adoc,mkdist,portgen_java,portgen_java.1,settings-global.xml,settings.template,specification.adoc}
