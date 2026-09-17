@@ -49,6 +49,10 @@ so there's no way to just package these standard deps and have Maven find them. 
 if there were a separate port/package of these deps, a future version of this program 
 could just cp -r that into the temp folder.
 
+I tried to work around this using the `<repository>` elements in a `<profile>` in `settings.xml`,
+but these seem to be only used for resolving from, not saving into, unlike `<localRepository>`,
+of which you can have only one (in the XML schema).
+
 === Base Portgen is written in Perl
 
 Perl can call Java, using `Inline::Java` - if we had that in base, this could be
