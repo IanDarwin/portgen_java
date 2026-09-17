@@ -1,0 +1,24 @@
+.Dd $Mdocdate$
+.Dt portgen_java 1
+.Os
+.Sh NAME
+.Nm portgen_java
+.Nd make a starter of a port for a Java program built using Maven.
+.Sh SYNOPSIS
+.Nm progname
+.Op Fl d
+.Op Fl f
+.Op Fl k
+.Op Fl r
+.Ar source-directory
+.Sh DESCRIPTION
+The
+.Nm
+utility reads the pom.xml file from the given source-directory
+and generates some of the boilerplate of an OpenBSD ports Makefile.
+.Sh FILES
+/usr/ports/mystuff/java - port is created here, under the name field in the pom file.
+.Sh EXIT STATUS
+1 if the target directory exists.
+.Sh BUGS
+Maven will download its standard plugins and dependencies for each user of this program.
