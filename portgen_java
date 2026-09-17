@@ -22,12 +22,14 @@ DISTNAME=	${name}-${version}
 PKGNAME=	${name}
 PKG_ARCH=	*
 CATEGORIES= java devel
-MASTER_SITES= https://repo1.maven.org/maven2/
+MASTER_SITES=	# Where to get a source archive
+MASTER_SITES+= https://repo1.maven.org/maven2/
 FETCH= ${WRKDIR}/${DISTNAME}.jar
 EXTRACT_SUFX=	.jar
+EXTRACT_SUBDIR=	${name} # make sure this doesn't conflict
 
 MODULES=		java
-MODJAVA_VER=		25+
+MODJAVA_VER=		25+	# Use a current release.
 
 EXTRA_DISTFILES	= \\
 ${distfiles_list}
@@ -94,14 +96,15 @@ void main(String[] args) throws Exception {
 	var version = project.getElementsByTagName("version").item(0).getTextContent();
 
 	if (version.contains("SNAPSHOT")) {
-		System.out.println("Warning: Snapshot version in pom file");
+		System.out.println("Error: Snapshot version in pom file");
+		System.exit(1);
 	}
 	System.out.printf("Artifact Name %s, Version %s\n", name, version);
 
 	Path mystuffdir = Path.of(MYSTUFF + name + "/");
 	if (Files.isDirectory(mystuffdir)) {
 		if (force) {
-			nukeDir(mystuffdir);
+			// Do nothing; let user decide.
 		} else {
 			System.out.println("Error: output directory exists: " + mystuffdir);
 			System.exit(1);
