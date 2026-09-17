@@ -3,4 +3,4 @@
 set -x
 
 cd ..
-tar czvf /tmp/portgen_java.tgz portgen_java/{README.adoc,*java,*template,mkdist}
+tar czvf /tmp/portgen_java-$(gitver).tgz portgen_java/{README.adoc,mkdist,portgen_java,settings-global.xml,settings.template,specification.adoc}

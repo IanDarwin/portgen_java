@@ -44,9 +44,9 @@ do_build:
 	mvn compile test package assembly:single
 
 do_install:
-	@echo Figure out where to install the JAR file, and do so here.
+	@echo If this isn't right, figure out where to install the JAR file, and do so here:
+	${INSTALL_DATA} ${WORKDIR}/target/${name}-${version}-jar-with-dependencies.jar /usr/local/lib/java/
 	@echo Consider a startup file in /usr/local/bin or /etc/rc.d as appropriate.
-	@exit 1
 
 .include <bsd.port.mk>
 """;

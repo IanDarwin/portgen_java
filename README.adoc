@@ -1,6 +1,6 @@
 = portgen_java
 
-A simple Java program to generate an OpenBSD port to build packages from a Java
+A simple Java program to generate an OpenBSD port to build a package from a Java
 program that has a pom file but doesn't offer precompiled packages or for which
 those are not trusted by the porter.
 
@@ -9,12 +9,17 @@ because it depends on a Java port being installed.
 
 == Usage
 
-	portgen_java [-f] source-dir
+	portgen_java [-f][-d][-v][-k] source-dir
 
 The given `source-dir` must be a project that has a pom file, and in general should have an
 `assembly:single` task to build a finished jar.
 
-The `-f` option tell it to remove a previously-generated existing `mystuff/java/NAME` directory.
+Options:
+
+* -d - debugging output
+* -f - force removal of the generated port directory before starting
+* -k - keep the temporary local repostiroy (it is by default deleted at the end)
+* -v - verbose - information less detailed than the debugging output.
 
 == What it does
 
