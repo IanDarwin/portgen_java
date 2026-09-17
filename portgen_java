@@ -55,28 +55,29 @@ static Path USER_REPO_PATH;
 final static String SETTINGS_TEMPLATE = USER_HOME + "/portgen_java/settings.template";
 final static String SETTINGS_FILE = USER_HOME + "/portgen_java/settings.xml";
 final static String MYSTUFF = "/usr/ports/mystuff/java/";
-static boolean debug = true;
-static boolean verbose = false;	// XXX Add in argv handling.
+static boolean debug = true; // Make false someday
+static boolean force = false;
+static boolean verbose = false;
 
 void main(String[] args) throws Exception {
 
-	boolean force = false;
-	String targetDir = "/";
+	String targetDir = null;
 
-	switch (args.length) {
-		case 0:
-			usage();
-			break;
-		case 1:
-			targetDir = args[0];
-			break;
-		case 2:
-			force = true;
-			targetDir = args[1];
-			break;
-		default:
-			usage();
-			break;
+	// Trivial arg parsing
+	if (args.length == 0) {
+		usage();
+	}
+	for (int i = 0; i < args.length; i++) {
+		String arg = args[i];
+		switch(arg) {
+			case "-d": debug = true; break;
+			case "-f": force = true; break;
+			case "-v": verbose = true; break;
+			default: targetDir = arg;
+		}
+	}
+	if (args == null) {
+		usage();
 	}
 
 	var pom = Path.of(targetDir + "/pom.xml");
@@ -134,7 +135,7 @@ void main(String[] args) throws Exception {
 	System.err.println("Waiting for the end (of the maven)");			 
 	int ret = maven.waitFor();
 	if (ret != 0) {
-		System.out.printf("Error: Maven get-geps failed, code %d\n", ret);
+		System.out.printf("Error: Maven get-deps failed, code %d\n", ret);
 		System.exit(1);
 	}
 
