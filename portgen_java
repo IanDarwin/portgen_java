@@ -55,8 +55,11 @@ static Path USER_REPO_PATH;
 final static String SETTINGS_TEMPLATE = USER_HOME + "/portgen_java/settings.template";
 final static String SETTINGS_FILE = USER_HOME + "/portgen_java/settings.xml";
 final static String MYSTUFF = "/usr/ports/mystuff/java/";
-static boolean debug = true; // Make false someday
+
+// Command-line settables
 static boolean force = false;
+static boolean debug = true; // Make false someday
+static boolean keep = false;
 static boolean verbose = false;
 
 void main(String[] args) throws Exception {
@@ -72,6 +75,7 @@ void main(String[] args) throws Exception {
 		switch(arg) {
 			case "-d": debug = true; break;
 			case "-f": force = true; break;
+			case "-k": keep = true; break;
 			case "-v": verbose = true; break;
 			default: targetDir = arg;
 		}
@@ -158,7 +162,12 @@ void main(String[] args) throws Exception {
 	System.out.println("Makefile generated in " + mystuffdir + "/Makefile - check it out!");
 
 	// Clean up the user repo now that we have the PLIST info.
-	nukeDir(USER_REPO_PATH);
+	if (keep) {
+		System.out.println("Leaving deps in " + USER_REPO_PATH + ".");
+	} else {
+		System.out.println("Cleaning up " + USER_REPO_PATH + "...");
+		nukeDir(USER_REPO_PATH);
+	}
 }
 
 // print usage and exit
