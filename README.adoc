@@ -4,14 +4,13 @@ A simple Java program to generate an OpenBSD port to build a package from a Java
 program that has a pom file but doesn't offer precompiled packages or for which
 those are not trusted by the porter.
 
-This needs to be packaged as a port in its own right; it cannot go into base
-because it depends on a Java port being installed.
+This it cannot go into base because it depends on a Java port (e.g., jdk-25) being installed.
 
 == Usage
 
 	portgen_java [-f][-d][-v][-k] source-dir
 
-The given `source-dir` must be a project that has a pom file, and in general should have an
+The given `source-dir` must be a project that has a pom file, and should have an
 `assembly:single` task to build a finished jar.
 
 Options:
@@ -44,24 +43,27 @@ This program doesn't yet generate (but these are trivial):
 
 == Future Work
 
-=== Work around bugs in Maven itself
+=== Work around limitations ("bugs") in Maven itself
 
-The familiar `mvn` command is just a skeleton. Running it on an utterly trivial
+The familiar `mvn` command is just a skeleton. Running it on an trivial "Hello World" java
 demo project downloads about 80MB of "standard" dependencies plus any that are needed by the app.
 
-Maven further does not distinguish between a user and system "local" directories,
-so there's no way to just package these standard deps and have Maven find them. However,
-if there were a separate port/package of these deps, a future version of this program 
-could just cp -r that into the temp folder.
+Maven further does not distinguish between a user and system "local"
+directories, so there's no way to just package these standard deps
+separately from the app-specific ones and have Maven find them.
+However, if there were a separate port/package of these deps, a future
+version of this program could just cp -r that into the temp folder.
 
 I tried to work around this using the `<repository>` elements in a `<profile>` in `settings.xml`,
 but these seem to be only used for resolving from, not saving into, unlike `<localRepository>`,
-of which you can have only one (in the XML schema).
+of which you can have only one (in the XML schema). That experiment is in the file
+`settings-global.xml`.
 
 === Base Portgen is written in Perl
 
 Perl can call Java, using `Inline::Java` - if we had that in base, this could be
 called directly from the existing portgen.
 
-Alternately, if somebody wants to manually (not using any AI) translate this into Perl,
+Alternately, if somebody wants to manually (not using AI) translate this into Perl,
 it could be added as a module into the standard perl-based `portgen` in base.
+But then you get to take over as maintainer!
