@@ -63,5 +63,5 @@ of which you can have only one (in the XML schema).
 Perl can call Java, using `Inline::Java` - if we had that in base, this could be
 called directly from the existing portgen.
 
-Alternately, if somebody wants to manually (not using any AI) wants to translate this into Perl,
+Alternately, if somebody wants to manually (not using any AI) translate this into Perl,
 it could be added as a module into the standard perl-based `portgen` in base.
