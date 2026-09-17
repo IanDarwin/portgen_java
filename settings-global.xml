@@ -6,17 +6,19 @@
 	<profiles>
 		<profile>
 		<id>portgen_java_main</id>
-			  <activation>
+				<activation>
 				<activeByDefault>true</activeByDefault>
 				</activation>
 				<repositories>
 				<repository>
-				  <id>StdStuff</id>
-				  <name>StdStuff</name>
-				  <url>http://localhost:8000</url>
-				  <layout>default</layout>
+					<id>StdStuff</id>
+					<name>StdStuff</name>
+					<url>http://localhost:8000</url>
+					<layout>default</layout>
+					<releases><enabled>true</enabled></releases>
+					<snapshots><enabled>true</enabled></snapshots>
 				</repository>
-			  </repositories>
+				</repositories>
 		</profile>
 	</profiles>
 </settings>
