@@ -153,15 +153,14 @@ void main(String[] args) throws Exception {
 	StringBuilder flist = new StringBuilder();
 	Files.walk(USER_REPO_PATH)
 		.filter(s -> s.toString().endsWith(".jar") | s.toString().endsWith(".pom") | s.toString().endsWith(".sha1"))
-		.forEach(p->flist.append(p).append(" \\\n"));
+		.forEach(p->flist.append(p.toString().replaceAll(USER_REPO_PATH.toString(),"").substring(1)).append(" \\\n"));
 
 	// Create generated Makefile in $mystuff/java/name
 	Files.createDirectories(mystuffdir);
 	String makefile = MAKEFILE_TEMPLATE
 		.replace("${name}", name)
 		.replace("${version}", version)
-		// Write filenames, excluding directory location and left-over leading "/"
-		.replace("${distfiles_list}", flist.toString().replaceAll(USER_REPO_PATH.toString().substring(1), ""));
+		.replace("${distfiles_list}", flist.toString());
 	Files.writeString(Path.of(mystuffdir + "/Makefile"), makefile);
 
 	System.out.println("Makefile generated in " + mystuffdir + "/Makefile - check it out!");
