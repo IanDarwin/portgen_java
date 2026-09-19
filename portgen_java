@@ -28,6 +28,8 @@ public class PortGenJava {
 			# set this to where to download the source archive
 			SITES=	XXX
 			EXTRACT_SUFX=	.tgz
+			# Stop Make from trying to extract the dependant Jar files
+			EXTRACT_ONLY= ${name}-${V}${EXTRACT_SUFX}
 			# lots of deps; make sure this doesn't conflict:
 			DIST_SUBDIR=	${name}
 			
