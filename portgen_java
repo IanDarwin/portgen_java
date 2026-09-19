@@ -45,10 +45,10 @@ public class PortGenJava {
 			PERMIT_PACKAGE=	XXX Change to Yes after verifying, and add license marker
 			NO_TEST=		Yes
 			
-			do_build:
+			do-build:
 				cd ${WRKDIR}; mvn -Dmaven.repo.local=/usr/ports/${name} compile test package assembly:single
 			
-			do_install:
+			do-install:
 				@echo If this isn't right, figure out where to install the JAR file, and do so here:
 				${INSTALL_DATA} ${WORKDIR}/target/${name}-${version}-jar-with-dependencies.jar /usr/local/lib/java/
 				@echo Consider a startup file (using javaPathHelper) in /usr/local/bin or /etc/rc.d as appropriate.
