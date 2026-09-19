@@ -30,20 +30,13 @@ CATEGORIES= java devel
 MODULES=		java
 MODJAVA_VER=		25+	# Use a current release.
 
-MAVEN_CENTRAL= https://repo1.maven.org/maven2/
-MAVEN_FILES	= \\
-${distfiles_list}
 
 RUN_DEPENDS+=		devel/desktop-file-utils \\
 			java/javaPathHelper
-			# java/standardMavenFiles
+#			java/standardMavenFiles
 
 PERMIT_PACKAGE=	Yes
 NO_TEST=		Yes
-
-# Need a better place to hang this.
-post_patch:
-	cd /usr/local/lib/java/gunk; echo ${MAVEN_FILES} | cpio -pd ${WORK_DIR}
 
 do_build:
 	cd ${WRKDIR}
@@ -53,6 +46,14 @@ do_install:
 	@echo If this isn't right, figure out where to install the JAR file, and do so here:
 	${INSTALL_DATA} ${WORKDIR}/target/${name}-${version}-jar-with-dependencies.jar /usr/local/lib/java/
 	@echo Consider a startup file (using javaPathHelper) in /usr/local/bin or /etc/rc.d as appropriate.
+
+MAVEN_CENTRAL= https://repo1.maven.org/maven2/
+MAVEN_FILES	= \\
+${distfiles_list}
+
+# Need a better place to hang this.
+post_patch:
+	cd /usr/local/lib/maven-deps/repository; echo ${MAVEN_FILES} | cpio -pd ${WORK_DIR}
 
 .include <bsd.port.mk>
 """;
