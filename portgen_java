@@ -1,8 +1,8 @@
 #!/usr/local/jdk-25/bin/java --source 25
 
-// For generating OpenBSD ports from Maven-based Java programs.
+// For generating OpenBSD ports of Maven-based Java programs.
 // Proof-of-concept version for fetching all deps in advance,
-// as needed by OpenBSD ports builders.
+// as needed by OpenBSD ports build process.
 
 import java.io.*;
 import java.util.*;
@@ -18,27 +18,32 @@ import org.w3c.dom.NodeList;
 final static String MAKEFILE_TEMPLATE = """
 # Makefile for ${name} - originally made by portgen_java
 # You'll need to do a lot of editing before committing this!
-DISTNAME=	${name}-${version}
+V=		${version}
+DISTNAME=	${name}-${V}
 PKGNAME=	${name}
 PKG_ARCH=	*
-CATEGORIES= java devel
-MASTER_SITES=	# Where to get a source archive
-SITES.maven= https://repo1.maven.org/maven2/
-EXTRACT_SUFX=	.jar
-EXTRACT_SUBDIR=	${name} # make sure this doesn't conflict
+SITES=	# where to download the source archive
+EXTRACT_SUFX=	.tgz
+DIST_SUBDIR=	${name} # lots of deps; make sure this doesn't conflict
 
+CATEGORIES= java devel
 MODULES=		java
 MODJAVA_VER=		25+	# Use a current release.
 
-DISTFILES.maven	= \\
+MAVEN_CENTRAL= https://repo1.maven.org/maven2/
+MAVEN_FILES	= \\
 ${distfiles_list}
 
 RUN_DEPENDS+=		devel/desktop-file-utils \\
 			java/javaPathHelper
 			# java/standardMavenFiles
 
-NO_BUILD=		Yes
+PERMIT_PACKAGE=	Yes
 NO_TEST=		Yes
+
+# Need a better place to hang this.
+post_patch:
+	cd /usr/local/lib/java/gunk; echo ${MAVEN_FILES} | cpio -pd ${WORK_DIR}
 
 do_build:
 	cd ${WRKDIR}
@@ -47,7 +52,7 @@ do_build:
 do_install:
 	@echo If this isn't right, figure out where to install the JAR file, and do so here:
 	${INSTALL_DATA} ${WORKDIR}/target/${name}-${version}-jar-with-dependencies.jar /usr/local/lib/java/
-	@echo Consider a startup file in /usr/local/bin or /etc/rc.d as appropriate.
+	@echo Consider a startup file (using javaPathHelper) in /usr/local/bin or /etc/rc.d as appropriate.
 
 .include <bsd.port.mk>
 """;
@@ -95,7 +100,7 @@ void main(String[] args) throws Exception {
 	var version = project.getElementsByTagName("version").item(0).getTextContent();
 
 	if (version.contains("SNAPSHOT")) {
-		System.out.println("Error: Snapshot version in pom file");
+		System.err.println("Error: Snapshot version in pom file");
 		System.exit(1);
 	}
 	System.out.printf("Artifact Name %s, Version %s\n", name, version);
@@ -105,7 +110,7 @@ void main(String[] args) throws Exception {
 		if (force) {
 			// Do nothing; let user decide.
 		} else {
-			System.out.println("Error: output directory exists: " + mystuffdir);
+			System.err.println("Error: output directory exists: " + mystuffdir);
 			System.exit(1);
 		}
 	}
@@ -145,7 +150,7 @@ void main(String[] args) throws Exception {
 	System.err.println("Waiting for the end (of the maven)");			 
 	int ret = maven.waitFor();
 	if (ret != 0) {
-		System.out.printf("Error: Maven get-deps failed, code %d\n", ret);
+		System.err.printf("Error: Maven get-deps failed, code %d\n", ret);
 		System.exit(1);
 	}
 
