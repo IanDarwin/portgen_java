@@ -131,17 +131,18 @@ public class PortGenJava {
 		List<Dependency> dependencies = deps(targetPomPath);
 
 		StringBuilder flist = new StringBuilder();
-		dependencies
-			.stream()
-			.skip(1)
-			.forEach((d -> {
-				for (String ext : new String[]{".pom", ".jar"}) {
-					flist.append('\t' + d.toMavenURL() + ext + " \\\n");
-				}
-        	}
-		));
+        boolean first = true;
+        for (PortGenJava.Dependency d : dependencies) {
+            if (first) {
+                first = false;
+                continue;
+            }
+            for (String ext : new String[]{".pom", ".jar"}) {
+                flist.append('\t' + d.toMavenURL() + ext + " \\\n");
+            }
+        }
 
-		// DO THE THING HERE:
+        // DO THE THING HERE:
 		// Create generated Makefile in $mystuff/java/name
 		String makefile = MAKEFILE_TEMPLATE
 				.replace("${name}", name)
