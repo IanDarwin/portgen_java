@@ -16,9 +16,19 @@ The
 .Nm
 utility reads the pom.xml file from the given source-directory
 and generates some of the boilerplate of an OpenBSD ports Makefile.
+.Pp
+The normal process is to build your app manually in its source directory (with a pom file, with assembly:single),
+then run this program pointed at that directory.
+If it completes normally, cd to the target directory /usr/ports/mystuff/java/NAME.
+Examine the makefile for XXXes, then run 'make makesum package install'.
+If that completes normally, create a startup script, either in bin or /etc/rc.d,
+and add that to the files subdir and to the install rule.
 .Sh FILES
 /usr/ports/mystuff/java - port is created here, under the name field in the pom file.
 .Sh EXIT STATUS
 1 if the target directory exists.
 .Sh BUGS
-Maven will download its standard plugins and dependencies for each user of this program.
+Maven will download its standard plugins and dependencies for each invocation of this program.
+The "standard" plugins include many versions of many plugins, for a total of about 80 megabytes.
+They will get downloaded again when you run 'make makesum.'
+This may be slow on sub-terabyte links.
