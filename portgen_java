@@ -44,7 +44,7 @@ public class PortGenJava {
 			NO_TEST=		Yes
 			
 			do-build:
-				cd ${WRKDIR}/${name}; mvn -Dmaven.repo.local=${WRKDIR}/${name} compile test package assembly:single
+				cd ${WRKDIR}/${name}; mvn -o -Dmaven.repo.local=${DISTDIR}/${name} compile test package assembly:single
 			
 			do-install:
 				@echo If this isn't right, figure out where to install the JAR file, and do so here:
