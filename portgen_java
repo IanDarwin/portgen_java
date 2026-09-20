@@ -46,7 +46,7 @@ public class PortGenJava {
 			NO_TEST=		Yes
 			
 			do-build:
-				cd ${WRKDIR}; mvn -Dmaven.repo.local=/usr/ports/${name} compile test package assembly:single
+				cd ${WRKDIR}/${name}; mvn -Dmaven.repo.local=${WRKDIR}/${name} compile test package assembly:single
 			
 			do-install:
 				@echo If this isn't right, figure out where to install the JAR file, and do so here:
@@ -121,6 +121,11 @@ public class PortGenJava {
 			}
 		}
 		Files.createDirectories(mystuffdir);
+		Path pkgPath = Files.createDirectories(mystuffdir.resolve("pkg"));
+		final Path descrPath = pkgPath.resolve("DESCR");
+		if (!Files.exists(descrPath)) {
+			Files.writeString(descrPath, "XXX Put a brief description of the program here");
+		}
 
 		// Get list of deps
 		List<Dependency> dependencies = deps(targetPomPath);
@@ -136,6 +141,7 @@ public class PortGenJava {
         	}
 		));
 
+		// DO THE THING HERE:
 		// Create generated Makefile in $mystuff/java/name
 		String makefile = MAKEFILE_TEMPLATE
 				.replace("${name}", name)
