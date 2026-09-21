@@ -4,7 +4,7 @@ A simple Java program to generate an OpenBSD port to build a package from a Java
 program that has a pom file but doesn't offer precompiled packages or for which
 those are not trusted by the porter.
 
-This it cannot go into base because it depends on a Java port (e.g., jdk-25) being installed.
+This cannot go into base because it depends on a Java port (e.g., jdk-25) being installed.
 
 == Usage
 
