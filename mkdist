@@ -2,8 +2,10 @@
 
 set -x
 
-GIT_VER=$(gitver)
-
+GIT_VER=1.1.0
+TAR=/tmp/portgen_java-${GIT_VER}.tgz 
 cd ..
 
-tar czvf /tmp/portgen_java-${GIT_VER}.tgz portgen_java/{LICENSE,README.adoc,mkdist,portgen_java,portgen_java.1,settings-global.xml,settings.template,specification.adoc}
+tar czvf ${TAR} portgen_java/{LICENSE,README.adoc,mkdist,portgen_java,portgen_java.1,settings-global.xml,settings.template,specification.adoc}
+
+scp $TAR dos:/var/www/htdocs/darwinsys.com/portgen_java
