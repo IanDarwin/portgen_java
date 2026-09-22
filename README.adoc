@@ -6,9 +6,32 @@ those are not trusted by the porter.
 
 This cannot go into base because it depends on a Java port (e.g., jdk-25) being installed.
 
+== The Problem
+
+Maven depends on downloading dependencies when it wants to. The OpenBSD ports tree
+requires that we not download anything when building ports (especially in bulk builds).
+
+== The solution
+
+We use Maven to download all the dependencies when you create the port.
+That's really the main function of this program.
+
+=== The next problem
+
+When you give Maven a blank directory (like /usr/ports/distfiles/NAME), it downloads
+some 80 MB of 'standard' dependencies. There's no way to tell it to download these
+only once, other than fixing them and doing a 'cp -r' whenever running this program.
+Then you'd have the problem of keeping that list up-to-date as Maven changes its mind
+about versions and content.
+
+=== The solution (or not)
+
+We ignore this problem and just dump everything - standard and application deps - into
+/usr/ports/distfiles/NAME.
+
 == Usage
 
-	portgen_java [-u][-d][-v][-k] target-pom
+	portgen_java [-u][-d][-v] target-pom
 
 The given target-pom file should build the app as a single artifact, normally via an
 `assembly:single` task to build a finished jar.
@@ -17,7 +40,6 @@ Options:
 
 * -d - debugging output
 * -u - update the generated port directory
-* -k - keep the temporary local repostiroy (it is by default deleted at the end)
 * -u - verbose - information less detailed than the debugging output.
 
 == What it does
