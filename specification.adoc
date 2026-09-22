@@ -4,17 +4,17 @@ A Java program to build an OpenBSD port to build a Java application.
 Similar to what portgen does for Perl5, GO and Ruby (and did for PyPI).
 
 The input is a pom.xml file in the source directory of a Java application,
-passed as the filename argument to this program.
+passed as the directory name argument to this program.
 
 The output is an OpenBSD ports Makefile, saved in /usr/ports/mystuff/java/NAME.
 The Makefile is generated from an internal string template.
 
-The program is free of external Jar file dependencies, and can be run
+The program is free of external Jar file dependencies, and can therefore be run
 as a script on Java 21+ using a shebang line, which is included.
 
 == Operation
 
-The program starts by reading a Maven pom.xml file, which is assumed to be in the source directory of a
+The program starts by reading the Maven pom.xml file, which is assumed to be in the source directory of a
 Java application project. It extracts the project name and version number, to use in the generated Makefile.
 
 The first main step is running the Maven binary `mvn` in the target directory,
@@ -27,8 +27,6 @@ The second main step is combining all this information into the Makefile, which 
 form with placeholders like "${name}", "${version}, and "${distfiles_list}".
 The generated Makefile is saved into the newly-created /usr/ports/mystuff/java/NAME.
 
-Finally, by default, the temporary local repo is deleted.
-
 Progress messages are printed after most steps.
 
 == Directories
@@ -36,7 +34,7 @@ Progress messages are printed after most steps.
 To clarify, there are three directories involved:
 
 * the source directory with the pom file and the java source code (passed in as an argument).
-* the temporary local repository into which files are downloaded.
+* the local repository (/usr/ports/distfiles/NAME, into which files are downloaded.
 * the generated port: /usr/ports/mystuff/java/NAME.
 
 == Invocation
